@@ -2958,6 +2958,11 @@ ignore-walk@^3.0.1:
   dependencies:
     minimatch "^3.0.4"
 
+imba@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/imba/-/imba-1.4.1.tgz#8ae39e5d64be1ecbe192edad31a8fb539434d38d"
+  integrity sha512-bNH8mqPxuyp7ju8GMf0gx7EIgTaBk0hq0m+jyAycCfnYEbE81CO8t3DWIvMZGqewFCzzKedd8Gk8dUs0YEO88w==
+
 import-cwd@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/import-cwd/-/import-cwd-2.1.0.tgz#aa6cf36e722761285cb371ec6519f53e2435b0a9"
