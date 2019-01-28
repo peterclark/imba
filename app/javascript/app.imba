@@ -1,24 +1,36 @@
-class Todo
-  prop title
-  prop done
+tag Movie < li
 
-  def initialize title
-    @title = title
-    @done  = no
+  def ontap
+    data:seen = !data:seen
+
+  def render
+    <self.movie .seen=(data:seen)>
+      <span.title> data:title
+      <span.year> data:year
 
 tag App
-  prop todos
+  prop movies
+  prop title
 
-  def addTodo
-    @todos.push Todo.new(@title)
+  def load url
+    const data = await window.fetch(url)
+    return data.json
+
+  def setup
+    @movies = await load('/movies')
+    Imba.commit
+
+  def addMovie
+    return unless @title
+    @movies.push { title: @title, year: null, seen: false }
     @title = ''
 
   def render
     <self>
-      <form.header :submit.prevent.addTodo>
+      <form.header :submit.prevent.addMovie>
         <input[@title] placeholder='Add...'>
-        <button type='submit'> 'Add item'
-      <ul> for todo in @todos
-        <li> todo.title
+        <button type='submit'> 'Add movie'
+      <ul> for movie in @movies
+        <Movie[movie]>
 
-Imba.mount <App.vbox todos=[]>, Imba.document:body
+Imba.mount <App.vbox>, Imba.document:body
