@@ -1,3 +1,7 @@
+import db from './firestore.imba'
+
+let movies = []
+
 tag Movie < li
 
   def ontap
@@ -9,20 +13,29 @@ tag Movie < li
       <span.year> data:year
 
 tag App
-  prop movies
   prop title
 
-  def load url
-    const data = await window.fetch(url)
-    return data.json
+  # def load url
+  #   const data = await window.fetch(url)
+  #   return data.json
+
+  # def setup
+  #   movies = await load('movies')
+  #   Imba.commit
+
+  def load collection
+    const data = await db.collection(collection).get()
+    return data
 
   def setup
-    @movies = await load('/movies')
+    data = await load('movies')
+    data.forEach do |doc|
+      movies.push doc.data
     Imba.commit
 
   def addMovie
     return unless @title
-    @movies.push { title: @title, year: null, seen: false }
+    movies.push { title: @title, year: null, seen: false }
     @title = ''
 
   def render
@@ -30,7 +43,7 @@ tag App
       <form.header :submit.prevent.addMovie>
         <input[@title] placeholder='Add...'>
         <button type='submit'> 'Add movie'
-      <ul> for movie in @movies
+      <ul> for movie in movies
         <Movie[movie]>
 
 Imba.mount <App.vbox>, Imba.document:body

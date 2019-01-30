@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "3.5",
+    "firebase": "^5.8.1",
     "imba": "^1.4.1"
   },
   "devDependencies": {
