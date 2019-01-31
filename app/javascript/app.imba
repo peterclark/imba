@@ -3,14 +3,40 @@ import db from './firestore.imba'
 let movies = []
 
 tag Movie < li
+  prop title
+  prop year
+  prop seen
 
-  def ontap
-    data:seen = !data:seen
+  def setup
+    update data
+
+  def mount
+    db.collection('movies').doc(id).onSnapshot do |movie|
+      if movie:exists
+        update movie.data
+
+  def update movie
+    title = movie:title
+    year  = movie:year
+    seen  = movie:seen
+    Imba.commit
+
+  def destroy
+    db.collection('movies').doc(id).delete().then do
+      console.log "movie #{id} deleted."
+
+  def toggleSeen
+    db.collection('movies').doc(id).update(seen: !seen)
 
   def render
-    <self.movie .seen=(data:seen)>
-      <span.title> data:title
-      <span.year> data:year
+    <self.seen=(seen)>
+      <span.title :tap.toggleSeen> 
+        <strong> title
+        ' ('
+        year
+        ')'
+      <span>
+        <i.fas.fa-times :tap.destroy>
 
 tag App
   prop title
@@ -30,13 +56,20 @@ tag App
   def setup
     data = await load('movies')
     data.forEach do |doc|
-      movies.push doc.data
+      let movie = doc.data
+      movie:id = doc:id
+      movies.push movie
     Imba.commit
 
   def addMovie
     return unless @title
-    movies.push { title: @title, year: null, seen: false }
-    @title = ''
+    let movie = { title: @title, seen: false, year: 2002 }
+    db.collection('movies')
+      .add(movie)
+      .then do |doc|
+        movie:id = doc:id
+        movies.push movie
+        @title = ''
 
   def render
     <self>
@@ -44,6 +77,6 @@ tag App
         <input[@title] placeholder='Add...'>
         <button type='submit'> 'Add movie'
       <ul> for movie in movies
-        <Movie[movie]>
+        <Movie id=movie:id data=movie>
 
 Imba.mount <App.vbox>, Imba.document:body

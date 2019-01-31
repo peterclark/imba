@@ -30,16 +30,6 @@ li {
     cursor: pointer;
 }
 
-li.movie {
-    display: flex;
-    justify-content: space-between;
-}
-
-li.seen {
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-
 div,form,header,footer,section,input,button,nav,aside,article {
     box-sizing: border-box;
 }
