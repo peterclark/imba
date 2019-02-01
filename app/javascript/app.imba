@@ -3,58 +3,54 @@ import db from './firestore.imba'
 let movies = []
 
 tag Movie < li
+
+  const movieDB = db.collection('movies')
+
   prop title
   prop year
   prop seen
+
+  def self.all
+    await movieDB.get
 
   def setup
     update data
 
   def mount
-    db.collection('movies').doc(id).onSnapshot do |movie|
+    movieDB.doc(id).onSnapshot do |movie|
       if movie:exists
         update movie.data
+      else
+        const index = movies.findIndex do |m|
+          m:id == id
+        movies.splice(index, 1)
+      Imba.commit
 
   def update movie
     title = movie:title
     year  = movie:year
     seen  = movie:seen
-    Imba.commit
 
   def destroy
-    db.collection('movies').doc(id).delete().then do
-      console.log "movie #{id} deleted."
+    movieDB.doc(id).delete()
 
   def toggleSeen
-    db.collection('movies').doc(id).update(seen: !seen)
+    movieDB.doc(id).update(seen: !seen)
 
   def render
     <self.seen=(seen)>
-      <span.title :tap.toggleSeen> 
-        <strong> title
-        ' ('
-        year
-        ')'
+      <span.title :tap.toggleSeen>
+        <strong>
+          title
+          <small css:opacity='.5'> " {year}"
       <span>
-        <i.fas.fa-times :tap.destroy>
+        <i.fas.fa-times :tap.destroy css:color='darkred'>
 
 tag App
   prop title
 
-  # def load url
-  #   const data = await window.fetch(url)
-  #   return data.json
-
-  # def setup
-  #   movies = await load('movies')
-  #   Imba.commit
-
-  def load collection
-    const data = await db.collection(collection).get()
-    return data
-
   def setup
-    data = await load('movies')
+    data = await Movie.all
     data.forEach do |doc|
       let movie = doc.data
       movie:id = doc:id
