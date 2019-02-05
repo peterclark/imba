@@ -11,27 +11,28 @@ tag Movie < li
   prop seen
 
   def self.all
-    await movieDB.get
+    await movieDB.orderBy('title').limit(10).get
 
   def setup
     update data
 
   def mount
+    console.log "mounting {id}"
     movieDB.doc(id).onSnapshot do |movie|
       if movie:exists
+        console.log "updating {id}"
         update movie.data
       else
-        const index = movies.findIndex do |m|
-          m:id == id
-        movies.splice(index, 1)
+        console.log "deleting {id}"
+        movies = movies.filter do |m| m:id != id
       Imba.commit
 
   def update movie
-    title = movie:title
-    year  = movie:year
-    seen  = movie:seen
+    title   = movie:title
+    year    = movie:year
+    seen    = movie:seen
 
-  def destroy
+  def delete
     movieDB.doc(id).delete()
 
   def toggleSeen
@@ -44,7 +45,7 @@ tag Movie < li
           title
           <small css:opacity='.5'> " {year}"
       <span>
-        <i.fas.fa-times :tap.destroy css:color='darkred'>
+        <i.fas.fa-times :tap.delete css:color='darkred'>
 
 tag App
   prop title
