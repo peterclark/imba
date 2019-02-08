@@ -1,79 +1,57 @@
-import db from './firestore.imba'
+const axios = require('axios')
 
 let movies = []
 
 tag Movie < li
 
-  const movieDB = db.collection('movies')
-
-  prop title
-  prop year
-  prop seen
+  def self.create movie
+    await axios.post('/movies', movie)
 
   def self.all
-    await movieDB.orderBy('title').limit(10).get
-
-  def setup
-    update data
-
-  def mount
-    console.log "mounting {id}"
-    movieDB.doc(id).onSnapshot do |movie|
-      if movie:exists
-        console.log "updating {id}"
-        update movie.data
-      else
-        console.log "deleting {id}"
-        movies = movies.filter do |m| m:id != id
-      Imba.commit
-
+    await axios.get('/movies')
+  
   def update movie
-    title   = movie:title
-    year    = movie:year
-    seen    = movie:seen
+    axios.put("/movies/{data:id}", movie).then do |res|
+      console.log res:statusText
 
   def delete
-    movieDB.doc(id).delete()
+    axios.delete("/movies/{data:id}").then do |res|
+      console.log res:statusText
+      trigger('moviedelete', data)
 
-  def toggleSeen
-    movieDB.doc(id).update(seen: !seen)
-
+  def complete
+    data:seen = !data:seen
+    update data
+    
   def render
-    <self.seen=(seen)>
-      <span.title :tap.toggleSeen>
-        <strong>
-          title
-          <small css:opacity='.5'> " {year}"
-      <span>
-        <i.fas.fa-times :tap.delete css:color='darkred'>
+    <self.seen=(data:seen) style='display: flex; justify-content: space-between'> 
+      <span.title :tap.complete> data:title
+      <span.delete :tap.delete>
+        <i.fas.fa-times css:color='darkred'>
 
 tag App
-  prop title
 
   def setup
-    data = await Movie.all
-    data.forEach do |doc|
-      let movie = doc.data
-      movie:id = doc:id
-      movies.push movie
+    let response = await Movie.all
+    movies = response:data
     Imba.commit
+  
+  def onsubmit e
+    e.prevent
+    let params = { title: @field.value, year: 2000, seen: false }
+    let response = await Movie.create(params)
+    movies.push(response:data)
+    @field.value = ""
 
-  def addMovie
-    return unless @title
-    let movie = { title: @title, seen: false, year: 2002 }
-    db.collection('movies')
-      .add(movie)
-      .then do |doc|
-        movie:id = doc:id
-        movies.push movie
-        @title = ''
-
+  def onmoviedelete e
+    movies = movies.filter do |movie| movie:id != e.data:id
+    
   def render
     <self>
-      <form.header :submit.prevent.addMovie>
-        <input[@title] placeholder='Add...'>
-        <button type='submit'> 'Add movie'
-      <ul> for movie in movies
-        <Movie id=movie:id data=movie>
+      <form.header>
+        <input@field type='text' placeholder="What to do...">
+        <button type='submit'> "Add"
+      <ul.grow> for movie in movies
+        <Movie id="movie-{movie:id}" data=movie>
 
-Imba.mount <App.vbox>, Imba.document:body
+Imba.mount(<App>)
