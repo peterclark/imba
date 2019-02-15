@@ -24,7 +24,7 @@ tag Movie < li
     update data
     
   def render
-    <self.seen=(data:seen) style='display: flex; justify-content: space-between'> 
+    <self.seen=(data:seen) data-position=data:position style='display: flex; justify-content: space-between'> 
       <span.title :tap.complete> data:title
       <span.delete :tap.delete>
         <i.fas.fa-times css:color='darkred'>
