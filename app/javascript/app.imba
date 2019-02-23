@@ -2,6 +2,21 @@ const axios = require('axios')
 
 let movies = []
 
+tag Like < i
+
+  def icon_type
+    if data:like
+      'fas'
+    else
+      'far'
+
+  def toggleLike
+    data:like = !data:like
+    trigger('liketoggled', data)
+
+  def render
+    <self.fa-heart :tap.toggleLike .{icon_type} css:margin="0 .5rem 0 0">
+
 tag Movie < li
 
   def self.create movie
@@ -22,10 +37,15 @@ tag Movie < li
   def complete
     data:seen = !data:seen
     update data
+
+  def onliketoggled e
+    update data
     
   def render
-    <self.seen=(data:seen) data-position=data:position style='display: flex; justify-content: space-between'> 
-      <span.title :tap.complete> data:title
+    <self.seen=(data:seen) id="movie-{data:id}" data-position=data:position style='display: flex; justify-content: space-between'> 
+      <div>
+        <Like data=data>
+        <span.title :tap.complete> data:title
       <span.delete :tap.delete>
         <i.fas.fa-times css:color='darkred'>
 
@@ -48,10 +68,12 @@ tag App
     
   def render
     <self>
+      <div.header>
+      <br>
       <form.header>
         <input@field type='text' placeholder="What to do...">
         <button type='submit'> "Add"
       <ul.grow> for movie in movies
-        <Movie id="movie-{movie:id}" data=movie>
+        <Movie data=movie>
 
 Imba.mount(<App>)

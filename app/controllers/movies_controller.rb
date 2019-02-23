@@ -28,7 +28,7 @@ class MoviesController < ActionController::API
   end
 
   def movie_params
-    params.require(:movie).permit(:title, :year, :seen)
+    params.require(:movie).permit(:title, :year, :seen, :like)
   end
 
 end
